@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101827">
+<title>StartPay — Personal Finance</title>
+<style>
+:root {
+  --bg:#f4f6fa; --card:#fff; --ink:#172033; --muted:#758096;
+  --line:#e7ebf2; --primary:#635bff; --green:#128565;
+  --red:#d84b62; --nav:#101827; --radius:18px;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0; background:var(--bg); color:var(--ink);
+  font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;
+}
+button,input,select { font:inherit; }
+button { cursor:pointer; }
+.app { display:grid; grid-template-columns:235px minmax(0,1fr); min-height:100vh; }
+.sidebar {
+  background:var(--nav); color:#fff; padding:28px 18px;
+  display:flex; flex-direction:column; gap:28px;
+}
+.brand { font-size:25px; font-weight:800; letter-spacing:-1px; }
+.brand span { color:#a7a2ff; }
+.brand small { display:block; font-size:11px; font-weight:500; color:#aeb8ca; letter-spacing:1px; }
+.nav-label { color:#8f9bb0; font-size:11px; text-transform:uppercase; letter-spacing:1.5px; margin:8px 10px; }
+.nav-link {
+  display:block; width:100%; padding:12px; border:0; border-radius:11px;
+  text-align:left; color:#c9d2e1; background:transparent; margin:4px 0;
+}
+.nav-link:hover,.nav-link.active { background:#252f42; color:#fff; }
+.sidebar-note { margin-top:auto; padding:14px; border:1px solid #354055; border-radius:14px; color:#bdc7d8; font-size:12px; }
+main { min-width:0; padding:30px clamp(16px,4vw,46px); }
+.topbar { display:flex; align-items:center; justify-content:space-between; gap:15px; margin-bottom:28px; }
+.eyebrow { color:var(--muted); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; }
+h1 { font-size:clamp(25px,3vw,34px); line-height:1.2; letter-spacing:-1px; margin:5px 0; }
+h2 { font-size:18px; margin:0; letter-spacing:-.3px; }
+p { margin:5px 0; }
+.muted { color:var(--muted); }
+.small { font-size:12px; }
+.button {
+  border:0; border-radius:11px; padding:11px 15px; font-weight:700;
+  background:var(--primary); color:#fff;
+}
+.button:hover { filter:brightness(.95); }
+.button.secondary { background:#eeedff; color:#4f46d9; }
+.button.danger { background:#fff0f2; color:var(--red); }
+.button.ghost { background:#f0f2f7; color:var(--ink); }
+.grid { display:grid; gap:18px; }
+.stats { grid-template-columns:repeat(3,minmax(0,1fr)); margin-bottom:20px; }
+.card {
+  background:var(--card); border:1px solid var(--line);
+  border-radius:var(--radius); padding:22px; min-width:0;
+  box-shadow:0 3px 12px #16213b05;
+}
+.stat-label { color:var(--muted); font-size:13px; font-weight:600; }
+.stat-value { font-size:clamp(22px,3vw,31px); font-weight:800; letter-spacing:-1px; margin:10px 0 3px; overflow-wrap:anywhere; }
+.stat-icon {
+  display:grid; place-items:center; width:39px; height:39px;
+  border-radius:12px; background:#f0efff; color:var(--primary); font-size:20px;
+}
+.stat-top { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.green { color:var(--green); } .red { color:var(--red); }
+.two-col { grid-template-columns:minmax(0,1.25fr) minmax(260px,.75fr); align-items:start; }
+.section-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px; }
+.field { display:flex; flex-direction:column; gap:6px; min-width:0; }
+.field label { color:#535e73; font-size:12px; font-weight:700; }
+input,select {
+  width:100%; min-width:0; padding:11px 12px; color:var(--ink);
+  background:#fff; border:1px solid #dce2ed; border-radius:10px; outline:none;
+}
+input:focus,select:focus { border-color:var(--primary); box-shadow:0 0 0 3px #635bff18; }
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:13px; }
+.full { grid-column:1/-1; }
+.actions { display:flex; gap:9px; flex-wrap:wrap; margin-top:15px; }
+.segment { display:flex; padding:4px; background:#f1f3f8; border-radius:11px; gap:3px; }
+.segment button { border:0; border-radius:8px; padding:8px 12px; background:transparent; color:var(--muted); }
+.segment button.active { background:#fff; color:var(--ink); box-shadow:0 1px 4px #16213b14; }
+.transaction-list { display:flex; flex-direction:column; }
+.transaction {
+  display:flex; align-items:center; gap:12px; padding:14px 0;
+  border-bottom:1px solid var(--line); min-width:0;
+}
+.transaction:last-child { border-bottom:0; }
+.tx-icon { width:42px; height:42px; flex-shrink:0; border-radius:13px; display:grid; place-items:center; background:#f0f2f8; font-size:19px; }
+.tx-info { flex:1; min-width:0; }
+.tx-title { font-weight:700; overflow-wrap:anywhere; }
+.tx-meta { color:var(--muted); font-size:12px; }
+.tx-right { text-align:right; flex-shrink:0; }
+.tx-amount { font-weight:800; }
+.tx-actions { display:flex; gap:5px; margin-top:5px; justify-content:flex-end; }
+.tx-actions button { border:0; padding:3px 6px; border-radius:6px; background:#f0f2f7; font-size:11px; }
+.empty { text-align:center; padding:32px 12px; color:var(--muted); }
+.empty-icon { font-size:28px; margin-bottom:7px; }
+.progress { height:9px; border-radius:20px; background:#edf0f6; overflow:hidden; margin:12px 0; }
+.progress span { display:block; height:100%; width:0; border-radius:20px; background:var(--primary); transition:width .2s; }
+.budget-numbers { display:flex; justify-content:space-between; gap:8px; font-size:13px; }
+.insight {
+  padding:13px 14px; border-radius:12px; background:#f5f4ff;
+  border:1px solid #e8e6ff; margin-top:12px; font-size:13px;
+}
+.bar-row { display:grid; grid-template-columns:100px minmax(30px,1fr) auto; align-items:center; gap:10px; margin:15px 0; font-size:12px; }
+.bar-track { height:8px; background:#edf0f6; border-radius:10px; overflow:hidden; }
+.bar-fill { height:100%; background:var(--primary); border-radius:10px; }
+.page { display:none; }
+.page.active { display:block; }
+.notice { padding:12px 14px; background:#f0f7ff; border-radius:12px; color:#385b88; font-size:12px; margin-top:14px; }
+footer { color:var(--muted); font-size:11px; text-align:center; padding:24px 0 8px; }
+@media(max-width:850px) {
+  .app { grid-template-columns:1fr; }
+  .sidebar { padding:14px 16px; gap:12px; }
+  .brand small,.nav-label,.sidebar-note { display:none; }
+  .sidebar nav { display:flex; gap:6px; overflow-x:auto; }
+  .nav-link { white-space:nowrap; width:auto; margin:0; padding:9px 12px; }
+  main { padding:23px 16px; }
+  .two-col { grid-template-columns:1fr; }
+}
+@media(max-width:560px) {
+  .stats { grid-template-columns:1fr; gap:10px; }
+  .card { padding:17px; }
+  .stat-value { font-size:27px; }
+  .topbar { align-items:flex-start; }
+  .topbar .button { padding:9px 11px; }
+  .form-grid { grid-template-columns:1fr; }
+  .full { grid-column:auto; }
+  .bar-row { grid-template-columns:83px minmax(20px,1fr) auto; gap:7px; }
+  .tx-icon { width:35px; height:35px; }
+  .transaction { gap:8px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">Start<span>Pay</span><small>PERSONAL FINANCE</small></div>
+    <div>
+      <div class="nav-label">Workspace</div>
+      <nav aria-label="Main navigation">
+        <button class="nav-link active" data-page="dashboard">▦ &nbsp; Overview</button>
+        <button class="nav-link" data-page="transactions">↕ &nbsp; Transactions</button>
+        <button class="nav-link" data-page="budget">◷ &nbsp; Monthly budget</button>
+        <button class="nav-link" data-page="insights">✧ &nbsp; Spending insights</button>
+      </nav>
+    </div>
+    <div class="sidebar-note">Your money, your overview.<br><br>Start with your own entries. No demo financial data is included.</div>
+  </aside>
+
+  <main>
+    <header class="topbar">
+      <div>
+        <div class="eyebrow" id="today"></div>
+        <h1 id="pageTitle">Your overview</h1>
+        <p class="muted" id="pageSubtitle">A clear picture of your finances.</p>
+      </div>
+      <button class="button" id="quickAdd">+ Add transaction</button>
+    </header>
+
+    <section class="page active" id="dashboard">
+      <div class="grid stats">
+        <article class="card">
+          <div class="stat-top"><div class="stat-label">Current balance</div><div class="stat-icon">₹</div></div>
+          <div class="stat-value" id="balance">₹0.00</div>
+          <div class="muted small">All recorded transactions</div>
+        </article>
+        <article class="card">
+          <div class="stat-top"><div class="stat-label">Income this month</div><div class="stat-icon">↗</div></div>
+          <div class="stat-value green" id="income">₹0.00</div>
+          <div class="muted small">Based on your entries</div>
+        </article>
+        <article class="card">
+          <div class="stat-top"><div class="stat-label">Expenses this month</div><div class="stat-icon">↘</div></div>
+          <div class="stat-value red" id="expenses">₹0.00</div>
+          <div class="muted small">Based on your entries</div>
+        </article>
+      </div>
+      <div class="grid two-col">
+        <article class="card">
+          <div class="section-head"><h2>Recent transactions</h2><button class="button secondary" data-goto="transactions">View all</button></div>
+          <div class="transaction-list" id="recentList"></div>
+        </article>
+        <article class="card">
+          <div class="section-head"><h2>Monthly budget</h2><button class="button secondary" data-goto="budget">Manage</button></div>
+          <div class="stat-label">Budget for this month</div>
+          <div class="stat-value" id="budgetOverview">Not set</div>
+          <div class="progress"><span id="budgetProgress"></span></div>
+          <div class="budget-numbers"><span id="budgetSpent">₹0.00 spent</span><span id="budgetPercent">No budget</span></div>
+          <div class="insight" id="budgetMessage">Set a monthly budget to track your spending.</div>
+        </article>
+      </div>
+      <div class="grid two-col" style="margin-top:18px">
+        <article class="card">
+          <div class="section-head"><h2>Spending by category</h2></div>
+          <div id="categoryChart"></div>
+        </article>
+        <article class="card">
+          <div class="section-head"><h2>Money snapshot</h2></div>
+          <p class="muted small">This month's recorded income minus expenses</p>
+          <div class="stat-value" id="netMonth">₹0.00</div>
+          <div class="insight" id="netMessage">Add transactions to see your monthly snapshot.</div>
+        </article>
+      </div>
+    </section>
+
+    <section class="page" id="transactions">
+      <div class="grid two-col">
+        <article class="card" id="transactionFormCard">
+          <div class="section-head"><h2 id="formHeading">Add transaction</h2></div>
+          <form id="transactionForm">
+            <input type="hidden" id="editId">
+            <div class="form-grid">
+              <div class="field full">
+                <label for="txTitle">Description</label>
+                <input id="txTitle" maxlength="100" placeholder="e.g. Grocery shopping" required>
+              </div>
+              <div class="field">
+                <label for="txType">Type</label>
+                <select id="txType"><option value="expense">Expense</option><option value="income">Income</option></select>
+              </div>
+              <div class="field">
+                <label for="txAmount">Amount (₹)</label>
+                <input id="txAmount" type="number" min="0.01" max="100000000000" step="0.01" placeholder="0.00" required>
+              </div>
+              <div class="field">
+                <label for="txCategory">Category</label>
+                <select id="txCategory">
+                  <option>Food</option><option>Transport</option><option>Shopping</option>
+                  <option>Bills</option><option>Housing</option><option>Health</option>
+                  <option>Education</option><option>Entertainment</option><option>Salary</option>
+                  <option>Freelance</option><option>Other</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="txDate">Date</label>
+                <input id="txDate" type="date" required>
+              </div>
+            </div>
+            <div class="actions">
+              <button class="button" type="submit" id="saveTx">Save transaction</button>
+              <button class="button ghost" type="button" id="cancelEdit" hidden>Cancel edit</button>
+            </div>
+            <div class="notice">Entries are saved in this browser on this device. They are not connected to your bank.</div>
+          </form>
+        </article>
+        <article class="card">
+          <div class="section-head"><h2>Transaction totals</h2></div>
+          <p class="muted small">All recorded entries</p>
+          <div class="stat-value" id="allCount">0</div>
+          <p class="muted small">transactions recorded</p>
+          <div class="progress"><span id="incomeShare"></span></div>
+          <div class="budget-numbers"><span>Income</span><strong id="allIncome">₹0.00</strong></div>
+          <div class="budget-numbers" style="margin-top:10px"><span>Expenses</span><strong id="allExpenses">₹0.00</strong></div>
+        </article>
+      </div>
+      <article class="card" style="margin-top:18px">
+        <div class="section-head"><h2>All transactions</h2><div class="field"><label for="filterType">Filter</label><select id="filterType"><option value="all">All types</option><option value="income">Income</option><option value="expense">Expenses</option></select></div></div>
+        <div class="transaction-list" id="allList"></div>
+      </article>
+    </section>
+
+    <section class="page" id="budget">
+      <div class="grid two-col">
+        <article class="card">
+          <div class="section-head"><h2>Plan your monthly budget</h2></div>
+          <p class="muted small">Choose a total spending limit for the current month.</p>
+          <form id="budgetForm" style="margin-top:18px">
+            <div class="field">
+              <label for="budgetAmount">Monthly budget (₹)</label>
+              <input id="budgetAmount" type="number" min="0.01" max="100000000000" step="0.01" placeholder="Enter your budget" required>
+            </div>
+            <div class="actions">
+              <button class="button" type="submit">Save budget</button>
+              <button class="button danger" type="button" id="clearBudget">Clear budget</button>
+            </div>
+          </form>
+        </article>
+        <article class="card">
+          <div class="section-head"><h2>Budget status</h2></div>
+          <div class="stat-label">Spent this month</div>
+          <div class="stat-value" id="budgetPageSpent">₹0.00</div>
+          <div class="progress"><span id="budgetPageProgress"></span></div>
+          <div class="budget-numbers"><span id="budgetPageLeft">Remaining: —</span><span id="budgetPagePercent">No budget</span></div>
+          <div class="insight" id="budgetPageMessage">Add a budget to get started.</div>
+        </article>
+      </div>
+      <article class="card" style="margin-top:18px">
+        <h2>How it works</h2>
+        <p class="muted" style="margin-top:10px">Your budget compares your recorded expenses in the current calendar month with the monthly limit you set. Income does not count as spending.</p>
+        <p class="muted small">A budget is a planning aid, not a bank balance or financial recommendation.</p>
+      </article>
+    </section>
+
+    <section class="page" id="insights">
+      <div class="grid stats">
+        <article class="card"><div class="stat-label">Top spending category</div><div class="stat-value" id="topCategory" style="font-size:23px">Not available</div><p class="muted small">This calendar month</p></article>
+        <article class="card"><div class="stat-label">Largest expense</div><div class="stat-value" id="largestExpense">₹0.00</div><p class="muted small" id="largestExpenseName">No expense recorded</p></article>
+        <article class="card"><div class="stat-label">Savings difference</div><div class="stat-value" id="insightNet">₹0.00</div><p class="muted small">Monthly income minus expenses</p></article>
+      </div>
+      <div class="grid two-col">
+        <article class="card">
+          <div class="section-head"><h2>Category breakdown</h2></div>
+          <div id="insightChart"></div>
+        </article>
+        <article class="card">
+          <div class="section-head"><h2>Your spending notes</h2></div>
+          <div id="insightNotes"></div>
+          <div class="notice">These insights are calculated from your entries using simple rules. No AI service or bank data is connected.</div>
+        </article>
+      </div>
+    </section>
+    <footer>StartPay · Personal finance dashboard · Your data stays in this browser</footer>
+  </main>
+</div>
+
+<script>
+(() => {
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const KEYS = { tx: "startpay_transactions_v1", budget: "startpay_monthly_budget_v1" };
+  const money = n => new Intl.NumberFormat("en-IN", {
+    style:"currency", currency:"INR", maximumFractionDigits:2
+  }).format(Number(n) || 0);
+  const todayISO = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  };
+  const currentMonth = () => todayISO().slice(0,7);
+  const safeLoad = (key, fallback) => {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw === null ? fallback : JSON.parse(raw);
+    } catch { return fallback; }
+  };
+  let transactions = safeLoad(KEYS.tx, []);
+  if (!Array.isArray(transactions)) transactions = [];
+  transactions = transactions.filter(t =>
+    t && typeof t.id === "string" &&
+    typeof t.title === "string" &&
+    (t.type === "income" || t.type === "expense") &&
+    Number.isFinite(Number(t.amount)) && Number(t.amount) > 0 &&
+    typeof t.date === "string"
+  );
+  let budget = safeLoad(KEYS.budget, null);
+  if (!(Number.isFinite(Number(budget)) && Number(budget) > 0)) budget = null;
+
+  function save() {
+    try {
+      localStorage.setItem(KEYS.tx, JSON.stringify(transactions));
+      if (budget === null) localStorage.removeItem(KEYS.budget);
+      else localStorage.setItem(KEYS.budget, JSON.stringify(budget));
+      return true;
+    } catch {
+      alert("Your browser could not save the changes. Check browser storage settings and available space.");
+      return false;
+    }
+  }
+  function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, c => ({
+      "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+    })[c]);
+  }
+  function inMonth(t) { return t.date.slice(0,7) === currentMonth(); }
+  function sum(items, type) {
+    return items.filter(t => !type || t.type === type)
+      .reduce((a,t) => a + Number(t.amount), 0);
+  }
+  function monthTransactions() { return transactions.filter(inMonth); }
+  function monthExpenses() { return sum(monthTransactions(), "expense"); }
+  function monthIncome() { return sum(monthTransactions(), "income"); }
+  function sorted(items) {
+    return [...items].sort((a,b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+  }
+  const icons = { Food:"🍽️", Transport:"🚌", Shopping:"🛍️", Bills:"🧾",
+    Housing:"🏠", Health:"✚", Education:"📚", Entertainment:"🎬",
+    Salary:"💼", Freelance:"💻", Other:"•" };
+  function transactionHTML(t) {
+    const income = t.type === "income";
+    return `<div class="transaction">
+      <div class="tx-icon">${icons[t.category] || "•"}</div>
+      <div class="tx-info"><div class="tx-title">${escapeHTML(t.title)}</div>
+      <div class="tx-meta">${escapeHTML(t.category)} · ${escapeHTML(t.date)}</div></div>
+      <div class="tx-right"><div class="tx-amount ${income ? "green":"red"}">${income?"+":"−"}${money(t.amount)}</div>
+      <div class="tx-actions"><button data-edit="${escapeHTML(t.id)}">Edit</button><button data-delete="${escapeHTML(t.id)}">Delete</button></div></div>
+    </div>`;
+  }
+  function renderList(target, items, emptyText) {
+    $(target).innerHTML = items.length
